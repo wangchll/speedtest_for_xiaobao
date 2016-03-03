@@ -3,7 +3,7 @@ eval `dbus export speedtest`
 source /koolshare/scripts/base.sh
 version="0.0.1"
 #检查是否在运行
-speedtest_is_run=$(ps | grep "speedtest" | grep -v grep)
+speedtest_is_run=$(ps | grep "/koolshare/bin/speedtest" | grep -v grep)
 
 #判断测速是否正在进行，确保只有一个测速进程
 if [ ! -z "$speedtest_is_run" ]; then
@@ -16,7 +16,7 @@ dbus set speedtest_download=0
 dbus set speedtest_upload=0
 
 #定义测速脚本
-SPEEDTEST_CLI=`/jffs/speedtest 1 2 1 2 2>/dev/null`
+SPEEDTEST_CLI=`/koolshare/bin/speedtest 1 2 1 2 2>/dev/null`
 
 echo "$SPEEDTEST_CLI" | while
 read line
