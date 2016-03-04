@@ -448,6 +448,18 @@
                 var el = $("#speedtest_install_show");
                 var updateBtn = $("#updateBtn");
 
+
+                var hideInfoTimer;
+                function showInfo(msg, freq) {
+                    hideInfoTimer && clearTimeout(hideInfoTimer);
+                    el.html(msg).show();
+                    if (freq) {
+                        hideInfoTimer = setTimeout(function () {
+                            el.hide();
+                        }, freq);
+                    }
+                }
+
                 function loopFn(oncomplete) {
                     $.ajax({
                             type: "get",
@@ -460,46 +472,47 @@
                         .done(function() {
                             switch (+db_speedtest_["speedtest_install_status"]) {
                                 case STATUS.DOWNLOADING.code:
-                                    el.html(STATUS.DOWNLOADING.info);
+                                    showInfo(STATUS.DOWNLOADING.info);
                                     break;
                                 case STATUS.INSTALLING.code:
-                                    el.html(STATUS.INSTALLING.info);
+                                    showInfo(STATUS.INSTALLING.info);
                                     break;
                                 case STATUS.CHECKUPDATE.code:
-                                    el.html(STATUS.CHECKUPDATE.info);
+                                    showInfo(STATUS.CHECKUPDATE.info);
                                     break;
                                 case STATUS.INSTALLDONE.code:
                                     oncomplete();
                                     clearInterval(timer);
                                     timer = null;
-                                    el.html(STATUS.INSTALLDONE.info);
+                                    showInfo(STATUS.INSTALLDONE.info, 3000);
                                     version_show();
                                     refreshpage(STATUS.INSTALLDONE.code);
+                                    break;
                                 case STATUS.VERIFYERROR.code:
                                     oncomplete();
                                     clearInterval(timer);
                                     timer = null;
                                     updateBtn.show();
-                                    el.html(STATUS.VERIFYERROR.info);
+                                    showInfo(STATUS.VERIFYERROR.info, 3000);
                                     break;
                                 case STATUS.ISNEWEST.code:
                                     oncomplete();
                                     clearInterval(timer);
                                     timer = null;
                                     updateBtn.show();
-                                    el.html(STATUS.ISNEWEST.info);
+                                    showInfo(STATUS.ISNEWEST.info, 3000);
                                     break;
                                 case STATUS.CHECKERROR.code:
                                     oncomplete();
                                     clearInterval(timer);
                                     timer = null;
-                                    el.html(STATUS.CHECKERROR.info);
+                                    showInfo(STATUS.CHECKERROR.info, 3000);
                                     break;
                                 default:
                                     clearInterval(timer);
                                     timer = null;
                                     oncomplete();
-                                    el.html("");
+                                    showInfo("");
                                     break;
                             }
 
