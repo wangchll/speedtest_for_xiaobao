@@ -1,7 +1,7 @@
 #!/bin/sh
 eval `dbus export speedtest`
 source /koolshare/scripts/base.sh
-version="0.0.1"
+version="0.0.2"
 dbus set speedtest_version=$version
 
 #定义更新相关地址
@@ -48,7 +48,6 @@ if [ "$speedtest_update_check" == "1" ];then
 				sleep 5
 				dbus set speedtest_install_status="0"
 			else
-				stop_speedtest
 				tar -zxf speedtest.tar.gz
 				dbus set speedtest_enable="0"
 				dbus set speedtest_install_status="2"
