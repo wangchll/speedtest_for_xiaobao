@@ -146,205 +146,98 @@
             filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#A21717', endColorstr='#FF4848',GradientType=0 ); /* IE6-9 */
         }
         </style>
-        <script type="text/javascript">
-        function init() {
-            show_menu();
-            refreshSpeedView('upload', <% dbus_get_def("speedtest_upload", "0"); %>);
-            refreshSpeedView('download', <% dbus_get_def("speedtest_download", "0"); %>);
-        }
-        function update_visibility() {
-            //不满足快鸟条件的显示异常信息
-            if ($("#speedtest_can_upgrade").val() == "0") {
-                $("#warn").html($("#speedtest_warning").val());
-                showhide("warn", ($("#speedtest_can_upgrade").val() == "0"));
+        <style>
+            .plugin-header{
+                overflow: hidden;
+                padding:0px 20px;
             }
-            $("#warn").html($("#speedtest_warning").val());
-            showhide("warn", ($("#speedtest_can_upgrade").val() == "0"));
-            //给出快鸟运行状态
-            $("#kn_state2").html($("#speedtest_run_warnning").val());
-        }
-
-        function write_speedtest_install_status(){
-            $.ajax({
-                    type: "get",
-                    url: "dbconf",
-                    data: {
-                        p: "speedtest_"
-                    },
-                    dataType: "script"
-                })
-                .done(function() {
-                    //状态码和提示信息配置，方便以后修改和i18n
-                    var STATUS = {
-                        DOWNLOADING: { code: 1, info: "正在下载更新..." },
-                        INSTALLING : { code: 2, info: "正在安装更新..." },
-                        INSTALLDONE: { code: 3, info: "安装更新成功，5秒后刷新本页!" },
-                        VERIFYERROR: { code: 4, info: "下载文件校验不一致！" },
-                        ISNEWEST   : { code: 5, info: "然而并没有更新！" },
-                        CHECKUPDATE: { code: 6, info: "正在检查是否有更新~" },
-                        CHECKERROR : { code: 7, info: "检测更新错误！" },
-                    };
-
-                    var el = $("#speedtest_install_show");
-                    var updateBtn = $("#updateBtn");
-
-                    switch (+db_kuainiao_["speedtest_install_status"]) {
-                        case STATUS.DOWNLOADING.code:
-                            el.html(STATUS.DOWNLOADING.info);
-                            break;
-                        case STATUS.INSTALLING.code:
-                            el.html(STATUS.INSTALLING.info);
-                            break;
-                        case STATUS.INSTALLDONE.code:
-                            el.html(STATUS.INSTALLDONE.info);
-                            version_show();
-                            refreshpage(STATUS.INSTALLDONE.code);
-                        case STATUS.VERIFYERROR.code:
-                            updateBtn.show();
-                            el.html(STATUS.VERIFYERROR.info);
-                            break;
-                        case STATUS.ISNEWEST.code:
-                            updateBtn.show();
-                            el.html(STATUS.ISNEWEST.info);
-                            break;
-                        case STATUS.CHECKUPDATE.code:
-                            el.html(STATUS.CHECKUPDATE.info);
-                            break;
-                        case STATUS.CHECKERROR.code:
-                            el.html(STATUS.CHECKERROR.info);
-                            break;
-                        default:
-                            el.html("");
-                            break;
-                    }
-
-                    //尝试合并函数
-                    var p = "speedtest_";
-
-                    $.each(["warning","can_upgrade", "run_status", "run_warnning"], function (i, key) {
-                        key = p + key;
-                        if ("undefined" !== typeof db_kuainiao_[key]) {
-                            $("#" + key).val(db_kuainiao_[key]);
-                        }
-                    });
-
-                    // update_visibility();
-                    // //check_selected("kuainiao_start", db_kuainiao_.kuainiao_start);
-                    // //check_selected("kuainiao_time", db_kuainiao_.kuainiao_time);
-                    // check_downstream(
-                    //     parseInt(db_kuainiao_.kuainiao_config_downstream, 10),
-                    //     parseInt(db_kuainiao_.kuainiao_config_max_downstream, 10), 
-                    //     db_kuainiao_.kuainiao_run_status
-                    // );
-
-                    // setTimeout(write_kuainiao_install_status, 2000);
-                });
-        }
-
-
-        function version_show(){
-            if (db_speedtest_['speedtest_version'] != db_speedtest_['speedtest_version_web'] && db_speedtest_['speedtest_version_web'] !== undefined){
-                $("#speedtest_version_status").html("<i>有新版本：" + db_speedtest_['speedtest_version_web']);
-            } else {
-                if (db_speedtest_['speedtest_version'] == undefined) {
-                    $("#speedtest_version_status").html("<i>当前版本：");
-                } else {
-                    $("#speedtest_version_status").html("<i>当前版本：" + db_speedtest_['speedtest_version']);
-                }
+            .plugin-header .text{
+                float: left;
+                line-height:35px;
+                color:#fff;
+                font-size: 26px;
             }
-        }
-        function update_speedtest(o, s){
-            document.form.speedtest_update_check.value = 1;
-            document.getElementById('updateBtn').style.display = "none";
-            document.form.action_mode.value = s;
-            document.form.submit();
-        }
-
-        function reload_Soft_Center() {
-            location.href = "/Main_Soft_center.asp";
-        }
-
-        /* 测速 */
-        function speed2deg(speed) {
-            var deg = -123;
-            //表盘分区值，最后一个作为哨兵，防止超出最大表盘
-            var area = [1, 5, 10, 20, 30, 50, 75, 100, 999999];
-            if (speed) {
-                for (var i = 0, last, len = area.length; i < len; i++) {
-                    if (speed < area[i]) {
-                        last = area[i - 1] || 0;
-                        deg = (speed - last) * 30 / (area[i] - last) - 120 + 30 * i;
-                        break;
-                    }
-                }
+            .plugin-header .return-button{
+                float:right;
+                display:block;
+                background: url(/images/backprev.png) no-repeat center center;
+                width: 40px;
+                height: 40px;
+                text-indent: -9999px;
+                overflow:hidden;
             }
-            return Math.floor(deg > 123 ? 123 : deg);
-        }
-        function refreshSpeedView(type, speed) {
-            speed = parseFloat(speed).toFixed(2);
-            var deg = speed2deg(+speed);
-            $('#indicator_' + type).css({
-                transform: 'rotate(' + deg + 'deg)'
-            });
-            $('#' + type + '_speed').html(speed);
-        }
-
-        var loopCheckSpeed = (function () {
-            var timer;
-            var freq = 2000;
-            function loopFn(oncomplete) {
-                $.ajax({
-                    type: "get",
-                    url: "dbconf",
-                    data: {
-                        p:"speedtest_"
-                    },
-                    dataType: "script"
-                    })
-                    .done(function () {
-                        var speed = window.db_speedtest_;
-                        if (speed) {
-                            switch (+speed['speedtest_status']) {
-                                case 0:
-                                    oncomplete();
-                                    clearInterval(timer);
-                                    timer = null;
-                                case 1:
-                                    refreshSpeedView('upload', speed['speedtest_upload']);
-                                    refreshSpeedView('download', speed['speedtest_download']);
-                                    break;
-                                default:
-                                    console.log('init...');
-                                    break;
-                            }
-                        }
-                    });
+            .version-info{
+                color:red;
+                font-size: 14px;
+                font-weight:normal;
             }
-            return function (oncomplete) {
-                if (!timer) {
-                    refreshSpeedView('upload', 0);
-                    refreshSpeedView('download', 0);
-                    timer = setInterval(function () {
-                        loopFn(oncomplete);
-                    }, freq);
-                }
-            };
-        })();
 
-        //开始测速
-        function onSubmitCtrl(o, s) {
-            document.form.action_mode.value = s;
-            $("#updateBtn").attr("disabled", true);
-            $("#cmdBtn").attr("disabled", true);
-            $("#cmdBtn").html("测速中...");
-            document.form.submit();
-            loopCheckSpeed(function () {
-                $("#cmdBtn").attr("disabled", false);
-                $("#updateBtn").attr("disabled", false);
-                $("#cmdBtn").html("开始测速");
-            });
-        }
-        </script>
+            /* 测速表样式 */
+            .dashboard-content{
+                width: 504px;
+                margin:0px auto;
+            }
+            .graph{
+                display:inline-block;
+                margin-right: 40px;
+                position: relative;
+            }
+            .graph:last-child{
+                margin-right: 0;
+            }
+            .graph .desc{
+                color: #fff;
+                line-height: 24px;
+                font-size: 14px;
+                text-align: center;
+                font-weight: normal;
+            }
+            .graph .background{
+                background:url(/images/New_ui/speedmeter.png) no-repeat center -13px;
+                width:230px;
+                height:175px;   
+            }
+            .graph .speed{
+                text-align:center;
+                color:#fff;
+                font-weight:bold;
+                font-size: 18px;
+                line-height:24px;
+                position:absolute;
+                width:100%;
+                bottom:10px;
+            }
+            .graph .indicator{
+                position:absolute;
+                background:url('images/New_ui/indicator.png') no-repeat -16px center;
+                height:64px;
+                width: 17px;
+                left: 104px;
+                bottom: 62px;
+                -webkit-transform:rotate(-123deg);
+                -moz-transform:rotate(-123deg);
+                -o-transform:rotate(-123deg);
+                msTransform:rotate(-123deg);
+                transform-origin: center bottom;
+                transform:rotate(-123deg);
+                -webkit-transition: all 2s ease-in-out;
+                -moz-transition: all 2s ease-in-out;
+                -o-transition: all 2s ease-in-out;
+                transition: all 2s ease-in-out;
+            }
+            .opt-bar{
+                padding: 10px;
+                background-color:#4E5659;
+                margin-top: 20px;
+            }
+            .dashboard-info{
+                background:lightyellow;
+                line-height: 26px;
+                color:#7B6303;
+                padding: 0px 20px;
+                font-size: 12px;
+            }
+        </style>
     </head>
     <body onload="init();">
         <div id="TopBanner"></div>
@@ -373,93 +266,14 @@
                         <div id="subMenu"></div>
                     </td>
                     <td valign="top">
-                        <div style="margin-top:-150px;background-color:#3A4042;">
+                        <div style="margin-top:-140px;background-color:#3A4042;overflow:hidden;">
                             <h2 class="plugin-header">
                                 <span class="text">Speedtest网络测速
                                     <span class="version-info">(V<% dbus_get_def("speedtest_version", "0"); %>)</span>
                                 </span>
-                                <input class="return-button" type="image" onclick="reload_Soft_Center();" value="返回软件中心" src="/images/backprev.png"/>
+                                <a class="return-button" href="/Main_Soft_center.asp">返回软件中心</a>
                             </h2>
                             <div class="speedtest-dashboard">
-                                <style>
-                                    .plugin-header{
-                                        overflow: hidden;
-                                        padding:0px 10px;
-                                    }
-                                    .plugin-header .text{
-                                        float: left;
-                                        line-height:35px;
-                                        color:#fff;
-                                        font-size: 26px;
-                                    }
-                                    .plugin-header .return-button{
-                                        float:right;
-                                    }
-                                    .version-info{
-                                        color:red;
-                                        font-size: 14px;
-                                        font-weight:normal;
-                                    }
-
-                                    /* 测速表样式 */
-                                    .dashboard-content{
-                                        width: 504px;
-                                        margin:0px auto;
-                                    }
-                                    .graph{
-                                        display:inline-block;
-                                        margin-right: 40px;
-                                        position: relative;
-                                    }
-                                    .graph:last-child{
-                                        margin-right: 0;
-                                    }
-                                    .graph .desc{
-                                        color: #fff;
-                                        line-height: 24px;
-                                        font-size: 14px;
-                                        text-align: center;
-                                        font-weight: normal;
-                                    }
-                                    .graph .background{
-                                        background:url(/images/New_ui/speedmeter.png) no-repeat center -13px;
-                                        width:230px;
-                                        height:175px;   
-                                    }
-                                    .graph .speed{
-                                        text-align:center;
-                                        color:#fff;
-                                        font-weight:bold;
-                                        font-size: 18px;
-                                        line-height:24px;
-                                        position:absolute;
-                                        width:100%;
-                                        bottom:10px;
-                                    }
-                                    .graph .indicator{
-                                        position:absolute;
-                                        background:url('images/New_ui/indicator.png') no-repeat -16px center;
-                                        height:64px;
-                                        width: 17px;
-                                        left: 104px;
-                                        bottom: 62px;
-                                        -webkit-transform:rotate(-123deg);
-                                        -moz-transform:rotate(-123deg);
-                                        -o-transform:rotate(-123deg);
-                                        msTransform:rotate(-123deg);
-                                        transform-origin: center bottom;
-                                        transform:rotate(-123deg);
-                                        -webkit-transition: all 2s ease-in-out;
-                                        -moz-transition: all 2s ease-in-out;
-                                        -o-transition: all 2s ease-in-out;
-                                        transition: all 2s ease-in-out;
-                                    }
-                                    .opt-bar{
-                                        padding: 10px;
-                                        background-color:#4E5659;
-                                        margin-top: 20px;
-                                    }
-                                </style>
                                 <div class="dashboard-info" id="speedtest_install_show"></div>
                                 <div class="dashboard-content">
                                     <div class="graph">
@@ -480,7 +294,7 @@
                             </div>
                             <div class="opt-bar">
                                 <center>
-                                    <button id="updateBtn" class="button_gen" onclick="update_speedtest(this, 'Refresh');">检查更新</button>
+                                    <button id="updateBtn" class="button_gen" onclick="updateSpeed(this, ' Refresh ');">检查更新</button>
                                     <button id="cmdBtn" class="button_gen" onclick="onSubmitCtrl(this, ' Refresh ')">开始测速</button>
                                 </center>
                             </div>
@@ -496,5 +310,249 @@
             </table>
         </form>
         <div id="footer"></div>
+        <script type="text/javascript">
+            function init() {
+                show_menu();
+                TestModule.updateView('upload', <% dbus_get_def("speedtest_upload", "0"); %>);
+                TestModule.updateView('download', <% dbus_get_def("speedtest_download", "0"); %>);
+            }
+            function update_visibility() {
+                //不满足快鸟条件的显示异常信息
+                if ($("#speedtest_can_upgrade").val() == "0") {
+                    $("#warn").html($("#speedtest_warning").val());
+                    showhide("warn", ($("#speedtest_can_upgrade").val() == "0"));
+                }
+                $("#warn").html($("#speedtest_warning").val());
+                showhide("warn", ($("#speedtest_can_upgrade").val() == "0"));
+                //给出快鸟运行状态
+                $("#kn_state2").html($("#speedtest_run_warnning").val());
+            }
+
+
+            function version_show(){
+                if (db_speedtest_['speedtest_version'] != db_speedtest_['speedtest_version_web'] && db_speedtest_['speedtest_version_web'] !== undefined){
+                    $("#speedtest_version_status").html("<i>有新版本：" + db_speedtest_['speedtest_version_web']);
+                } else {
+                    if (db_speedtest_['speedtest_version'] == undefined) {
+                        $("#speedtest_version_status").html("<i>当前版本：");
+                    } else {
+                        $("#speedtest_version_status").html("<i>当前版本：" + db_speedtest_['speedtest_version']);
+                    }
+                }
+            }
+            
+
+            function reload_Soft_Center() {
+                location.href = "/Main_Soft_center.asp";
+            }
+
+            /* 测速模块 */
+            var TestModule = (function () {
+                var timer;
+                var freq = 2 * 1000;
+
+                var STATUS = {
+                    DONE: 0,
+                    DOING: 1
+                };
+
+                /* 速度转换成弧度 */
+                function speed2deg(speed) {
+                    var deg = -123;
+                    //表盘分区值，最后一个作为哨兵，防止超出最大表盘
+                    var area = [1, 5, 10, 20, 30, 50, 75, 100, 999999];
+                    if (speed) {
+                        for (var i = 0, last, len = area.length; i < len; i++) {
+                            if (speed < area[i]) {
+                                last = area[i - 1] || 0;
+                                deg = (speed - last) * 30 / (area[i] - last) - 120 + 30 * i;
+                                break;
+                            }
+                        }
+                    }
+                    return Math.floor(deg > 123 ? 123 : deg);
+                }
+                /* 更新表盘 */
+                function update(type, speed) {
+                    speed = parseFloat(speed).toFixed(2);
+                    var deg = speed2deg(+speed);
+                    $('#indicator_' + type).css({
+                        transform: 'rotate(' + deg + 'deg)'
+                    });
+                    $('#' + type + '_speed').html(speed);
+                }
+
+                /* 轮询返回的速度的方法 */
+                function loopFn(oncomplete) {
+                    $.ajax({
+                        type: "get",
+                        url: "dbconf",
+                        data: {
+                            p:"speedtest_"
+                        },
+                        dataType: "script"
+                        })
+                        .done(function () {
+                            var speed = window.db_speedtest_;
+                            if (speed) {
+                                switch (+speed['speedtest_status']) {
+                                    case STATUS.DONE:
+                                        oncomplete();
+                                        clearInterval(timer);
+                                        timer = null;
+                                    case STATUS.DOING:
+                                        hideLoading();
+                                        update('upload', speed['speedtest_upload']);
+                                        update('download', speed['speedtest_download']);
+                                        break;
+                                    default:
+                                        showLoading();
+                                        break;
+                                }
+                            }
+                        });
+                }
+
+                return {
+                    polling: function (oncomplete) {
+                        if (!timer) {
+                            timer = setInterval(function () {
+                                loopFn(oncomplete);
+                            }, freq);
+                        }
+                    },
+                    updateView: update,
+                    init: function (download, upload) {
+                        update('upload', upload || 0);
+                        update('download', download || 0);
+                    }
+                };
+            })();
+
+            /* 更新插件模块 */
+            var UpdateModule = (function () {
+                var timer;
+                var freq = 2 * 1000;
+
+                //状态码和提示信息配置，方便以后修改和i18n
+                var STATUS = {
+                    DOWNLOADING: { code: 1, info: "正在下载更新..." },
+                    INSTALLING : { code: 2, info: "正在安装更新..." },
+                    INSTALLDONE: { code: 3, info: "安装更新成功，5秒后刷新本页!" },
+                    VERIFYERROR: { code: 4, info: "下载文件校验不一致！" },
+                    ISNEWEST   : { code: 5, info: "然而并没有更新！" },
+                    CHECKUPDATE: { code: 6, info: "正在检查是否有更新~" },
+                    CHECKERROR : { code: 7, info: "检测更新错误！" },
+                };
+
+                var el = $("#speedtest_install_show");
+                var updateBtn = $("#updateBtn");
+
+                function loopFn(oncomplete) {
+                    $.ajax({
+                            type: "get",
+                            url: "dbconf",
+                            data: {
+                                p: "speedtest_"
+                            },
+                            dataType: "script"
+                        })
+                        .done(function() {
+                            switch (+db_speedtest_["speedtest_install_status"]) {
+                                case STATUS.DOWNLOADING.code:
+                                    el.html(STATUS.DOWNLOADING.info);
+                                    break;
+                                case STATUS.INSTALLING.code:
+                                    el.html(STATUS.INSTALLING.info);
+                                    break;
+                                case STATUS.CHECKUPDATE.code:
+                                    el.html(STATUS.CHECKUPDATE.info);
+                                    break;
+                                case STATUS.INSTALLDONE.code:
+                                    oncomplete();
+                                    clearInterval(timer);
+                                    timer = null;
+                                    el.html(STATUS.INSTALLDONE.info);
+                                    version_show();
+                                    refreshpage(STATUS.INSTALLDONE.code);
+                                case STATUS.VERIFYERROR.code:
+                                    oncomplete();
+                                    clearInterval(timer);
+                                    timer = null;
+                                    updateBtn.show();
+                                    el.html(STATUS.VERIFYERROR.info);
+                                    break;
+                                case STATUS.ISNEWEST.code:
+                                    oncomplete();
+                                    clearInterval(timer);
+                                    timer = null;
+                                    updateBtn.show();
+                                    el.html(STATUS.ISNEWEST.info);
+                                    break;
+                                case STATUS.CHECKERROR.code:
+                                    oncomplete();
+                                    clearInterval(timer);
+                                    timer = null;
+                                    el.html(STATUS.CHECKERROR.info);
+                                    break;
+                                default:
+                                    clearInterval(timer);
+                                    timer = null;
+                                    oncomplete();
+                                    el.html("");
+                                    break;
+                            }
+
+                            // //尝试合并函数
+                            // var p = "speedtest_";
+
+                            // $.each(["warning","can_upgrade", "run_status", "run_warnning"], function (i, key) {
+                            //     key = p + key;
+                            //     if ("undefined" !== typeof db_speedtest_[key]) {
+                            //         $("#" + key).val(db_speedtest_[key]);
+                            //     }
+                            // });
+                        });
+                }
+
+                return {
+                    polling: function (oncomplete) {
+                        if (!timer) {
+                            timer = setInterval(function () {
+                                loopFn(oncomplete);
+                            }, freq);
+                        }
+                    }
+                };
+            })();
+
+            //开始测速
+            function onSubmitCtrl(o, s) {
+                document.form.action_mode.value = s;
+                $("#updateBtn").attr("disabled", true);
+                $("#cmdBtn").attr("disabled", true);
+                $("#cmdBtn").html("测速中...");
+                document.form.submit();
+                TestModule.init();
+                TestModule.polling(function () {
+                    $("#cmdBtn").attr("disabled", false);
+                    $("#updateBtn").attr("disabled", false);
+                    $("#cmdBtn").html("开始测速");
+                });
+            }
+
+            //开始更新
+            function updateSpeed(o, s){
+                document.form.speedtest_update_check.value = 1;
+                $("#updateBtn").attr("disabled", true);
+                $("#cmdBtn").attr("disabled", true);
+                document.form.action_mode.value = s;
+                document.form.submit();
+                UpdateModule.polling(function () {
+                    $("#cmdBtn").attr("disabled", false);
+                    $("#updateBtn").attr("disabled", false);
+                });
+            }
+        </script>
     </body>
 </html>
