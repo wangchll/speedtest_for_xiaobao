@@ -89,9 +89,10 @@ dbus set speedtest_download=0
 dbus set speedtest_upload=0
 
 #定义测速脚本
-SPEEDTEST_CLI=`/koolshare/bin/speedtest 1 2 1 2 2>/dev/null`
+#SPEEDTEST_CLI=`/koolshare/bin/speedtest 1 2 1 2 2>/dev/null`
 
-echo "$SPEEDTEST_CLI" | while
+#echo "$SPEEDTEST_CLI" | while
+/koolshare/bin/speedtest 1 2 1 2 2>/dev/null | while
 read line
 do
 	download=$(echo $line | awk -F 'download = ' '{print $2}' | grep -oE "[0-9]{1,5}[\.][0-9]{1,2}")
