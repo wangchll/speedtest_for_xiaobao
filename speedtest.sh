@@ -1,7 +1,7 @@
 #!/bin/sh
 eval `dbus export speedtest`
 source /koolshare/scripts/base.sh
-version="0.0.5"
+version="0.0.6"
 dbus set speedtest_version=$version
 
 #定义更新相关地址
@@ -87,8 +87,8 @@ fi
 
 #定义测速变量(1、正在测速；0、测速完成)
 dbus set speedtest_status=1
-dbus set speedtest_download=0
-dbus set speedtest_upload=0
+dbus ram speedtest_download=0
+dbus ram speedtest_upload=0
 
 #定义测速脚本
 #SPEEDTEST_CLI=`/koolshare/bin/speedtest 1 2 1 2 2>/dev/null`
@@ -101,11 +101,11 @@ do
 	upload=$(echo $line | awk -F 'upload = ' '{print $2}' | grep -oE "[0-9]{1,5}[\.][0-9]{1,2}")
 	if [[ ! -z $download ]]; then
 		#echo "download : "$download
-		dbus set speedtest_download=$download
+		dbus ram speedtest_download=$download
 	fi
 	if [[ ! -z $upload ]]; then
 		#echo "upload : "$upload
-		dbus set speedtest_upload=$upload
+		dbus ram speedtest_upload=$upload
 	fi
 done;
 
