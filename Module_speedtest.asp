@@ -578,6 +578,10 @@
                     $("#updateBtn").attr("disabled", false);
                 });
             }
+
+			function done_validating(action) {
+				return true;
+			}
         </script>
     </body>
 </html>

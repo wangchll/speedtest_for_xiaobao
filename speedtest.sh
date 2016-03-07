@@ -1,9 +1,9 @@
 #!/bin/sh
 eval `dbus export speedtest`
 source /koolshare/scripts/base.sh
-version="0.0.4"
+version="0.0.5"
 dbus set speedtest_version=$version
-check_version
+
 #定义更新相关地址
 UPDATE_VERSION_URL="https://raw.githubusercontent.com/wangchll/speedtest_for_xiaobao/master/version"
 UPDATE_TAR_URL="https://raw.githubusercontent.com/wangchll/speedtest_for_xiaobao/master/speedtest.tar.gz"
@@ -16,6 +16,8 @@ check_version(){
 		dbus set speedtest_version_web=$speedtest_version_web1
 	fi
 }
+
+check_version
 
 ##更新插件
 
