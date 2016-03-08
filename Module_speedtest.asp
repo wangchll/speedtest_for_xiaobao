@@ -428,6 +428,10 @@
                 return {
                     polling: function (oncomplete) {
                         if (!timer) {
+                            //一般第一次不可能就结束了，所以这里偷懒了，没有判断第一次是否成功才去做下面的操作
+                            setTimeout(function () {
+                                loopFn(oncomplete);
+                            }, 1000);
                             timer = setInterval(function () {
                                 loopFn(oncomplete);
                             }, freq);
@@ -543,6 +547,10 @@
                 return {
                     polling: function (oncomplete) {
                         if (!timer) {
+                            //一般第一次不可能就结束了，所以这里偷懒了，没有判断第一次是否成功才去做下面的操作
+                            setTimeout(function () {
+                                loopFn(oncomplete);
+                            }, 1000);
                             timer = setInterval(function () {
                                 loopFn(oncomplete);
                             }, freq);
@@ -555,6 +563,7 @@
             function onSubmitCtrl(o, s) {
                 document.form.action_mode.value = s;
                 $("#updateBtn").attr("disabled", true);
+                $("#updateBtn").hide();
                 $("#cmdBtn").attr("disabled", true);
                 $("#cmdBtn").html("测速中...");
                 document.form.submit();
@@ -562,6 +571,7 @@
                 TestModule.polling(function () {
                     $("#cmdBtn").attr("disabled", false);
                     $("#updateBtn").attr("disabled", false);
+                    $("#updateBtn").show();
                     $("#cmdBtn").html("开始测速");
                 });
             }
@@ -571,11 +581,15 @@
                 document.form.speedtest_update_check.value = 1;
                 $("#updateBtn").attr("disabled", true);
                 $("#cmdBtn").attr("disabled", true);
+                $("#cmdBtn").hide();
+                $("#updateBtn").html('检查中...');
                 document.form.action_mode.value = s;
                 document.form.submit();
                 UpdateModule.polling(function () {
                     $("#cmdBtn").attr("disabled", false);
                     $("#updateBtn").attr("disabled", false);
+                    $("#cmdBtn").show();
+                    $("#updateBtn").html('检查更新');
                 });
             }
 
